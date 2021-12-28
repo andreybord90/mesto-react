@@ -1,0 +1,9 @@
+.popup__exit_type_image {
+  left: calc(100% + 8px);
+}
+
+@media (max-width: 800px) {
+  .popup__exit_type_image {
+    left: calc(100% - 20px);
+  }
+}

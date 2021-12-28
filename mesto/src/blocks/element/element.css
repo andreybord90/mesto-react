@@ -1,0 +1,13 @@
+.element {
+  background-color: #fff;
+  width: 282px;
+  border-radius: 10px;
+  z-index: 1;
+  position: relative;
+}
+
+@media (max-width: 800px) {
+  .element {
+    margin: 0 auto;
+  }
+}
