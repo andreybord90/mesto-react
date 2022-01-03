@@ -1,8 +1,8 @@
 import React from "react";
 
-function Card({ card, handleCardClick }) {
+function Card({ card, onCardClick }) {
   function handleClick() {
-    handleCardClick(card);
+    onCardClick(card);
   }
 
   return (

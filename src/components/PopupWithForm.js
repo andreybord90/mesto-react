@@ -1,9 +1,16 @@
 import React from "react";
 // import { useEffect } from "react";
-import { useClosePopup } from "../utils/utils";
+// import { useClosePopup } from "../utils/utils";
 
-function PopupWithForm({ name, title, isOpen, onClose, children }) {
-  useClosePopup("popup_opened", "popup__exit", onClose);
+function PopupWithForm({
+  name,
+  title,
+  isOpen,
+  onClose,
+  children,
+  useClosePopup,
+}) {
+  useClosePopup("popup_opened", "popup__exit", onClose, isOpen);
 
   return (
     <>
