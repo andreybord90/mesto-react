@@ -1,10 +1,11 @@
 import React from "react";
+import { useEffect } from "react";
+
 import Header from "./Header";
 import Main from "./Main";
 import Footer from "./Footer";
 import PopupWithForm from "./PopupWithForm";
 import ImagePopup from "./ImagePopup";
-import { useClosePopupByEscape } from "../utils/utils";
 
 function App() {
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] =
@@ -12,7 +13,9 @@ function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] =
     React.useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = React.useState(false);
-  const [selectedCard, setSelectedCard] = React.useState(false);
+  const [isRemovePlacePopupOpen, setRemovePlacePopupOpen] =
+    React.useState(false);
+  const [selectedCard, setSelectedCard] = React.useState({});
 
   const handleEditAvatarClick = () => {
     setIsEditAvatarPopupOpen(!isEditAvatarPopupOpen);
@@ -25,6 +28,9 @@ function App() {
   const handleAddPlaceClick = () => {
     setIsAddPlacePopupOpen(!isAddPlacePopupOpen);
   };
+  const handleRemovePlaceClick = () => {
+    setRemovePlacePopupOpen(!isRemovePlacePopupOpen);
+  };
 
   const handleCardClick = (card) => {
     setSelectedCard(card);
@@ -34,8 +40,48 @@ function App() {
     setIsEditProfilePopupOpen(false);
     setIsAddPlacePopupOpen(false);
     setIsEditAvatarPopupOpen(false);
+    setRemovePlacePopupOpen(false);
     setSelectedCard({ name: "", link: "" });
   };
+
+  const useClosePopupByEscape = (closePopupHandler) => {
+    const closeByEsc = (e) => {
+      if (e.key === "Escape") {
+        closePopupHandler();
+      }
+    };
+    useEffect(() => {
+      document.addEventListener("keydown", closeByEsc);
+      return () => document.removeEventListener("keydown", closeByEsc);
+    }, []);
+  };
+
+  const useClosePopup = (
+    overlayClassName,
+    closeButtonClassName,
+    onClose,
+    isOpen
+  ) => {
+    const handleClose = (e) => {
+      if (
+        e.target.classList.contains(overlayClassName /*"popup_opened"*/) ||
+        e.target.classList.contains(closeButtonClassName /*"popup__exit"*/)
+      ) {
+        if (onClose) {
+          onClose();
+        }
+      }
+    };
+    useEffect(() => {
+      if (isOpen) {
+        document.addEventListener("click", handleClose);
+        return () => {
+          document.removeEventListener("click", handleClose);
+        };
+      }
+    }, [isOpen]);
+  };
+
   useClosePopupByEscape(closeAllPopups);
 
   return (
@@ -47,6 +93,7 @@ function App() {
           onAddPlace={handleAddPlaceClick}
           onEditAvatar={handleEditAvatarClick}
           onCardClick={handleCardClick}
+          onRemovePlace={handleRemovePlaceClick}
         />
         <Footer />
       </div>
@@ -55,6 +102,7 @@ function App() {
         title="Редактировать профиль"
         isOpen={isEditProfilePopupOpen}
         onClose={closeAllPopups}
+        useClosePopup={useClosePopup}
       >
         <input
           type="text"
@@ -93,6 +141,7 @@ function App() {
         title="Новое место"
         isOpen={isAddPlacePopupOpen}
         onClose={closeAllPopups}
+        useClosePopup={useClosePopup}
       >
         <input
           type="text"
@@ -124,7 +173,13 @@ function App() {
           Создать
         </button>
       </PopupWithForm>{" "}
-      <PopupWithForm name="submit" title="Вы уверены" onClose={closeAllPopups}>
+      <PopupWithForm
+        name="submit"
+        title="Вы уверены"
+        isOpen={isRemovePlacePopupOpen}
+        onClose={closeAllPopups}
+        useClosePopup={useClosePopup}
+      >
         <button
           className="popup__button popup__button_type_submit"
           type="submit"
@@ -138,6 +193,7 @@ function App() {
         title="Обновить аватар"
         isOpen={isEditAvatarPopupOpen}
         onClose={closeAllPopups}
+        useClosePopup={useClosePopup}
       >
         <input
           type="url"
@@ -158,7 +214,11 @@ function App() {
           Сохранить
         </button>
       </PopupWithForm>
-      <ImagePopup card={selectedCard} onClose={closeAllPopups} />
+      <ImagePopup
+        card={selectedCard}
+        onClose={closeAllPopups}
+        useClosePopup={useClosePopup}
+      />
     </div>
   );
 }

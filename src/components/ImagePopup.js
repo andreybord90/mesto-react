@@ -1,7 +1,7 @@
 import React from "react";
-import { useClosePopup } from "../utils/utils";
+// import { useClosePopup } from "../utils/utils";
 
-function ImagePopup({ card, onClose }) {
+function ImagePopup({ card, onClose, useClosePopup }) {
   useClosePopup("popup_opened", "popup__exit", onClose);
   return (
     <>
