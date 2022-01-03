@@ -1,53 +1,35 @@
-import PopupWithForm from "./PopupWithForm";
+import React from "react";
+import { useEffect, useState } from "react";
 
-function Main() {
-  const handleEditAvatarClick = () => {
-    const popupAvatar = document.querySelector(".popup_type_avatar");
+import api from "../utils/api";
+import Card from "./Card";
 
-    const openPopupAvatar = new PopupWithForm({
-      popup: popupAvatar,
-      handleFormSubmit: (data) => {
-        openPopupAvatar.loading(true);
-        // api
-        //   .updateUserAvatar(data)
-        //   .then((data) => {
-        //     userInfo.setAvatar(data);
-        //     openPopupAvatar.close();
-        //   })
-        //   .catch((err) => console.log(err))
-        //   .finally(() => openPopupAvatar.loading(false));
-      },
-    });
+function Main(props) {
+  const [userName, setUserName] = React.useState();
+  const [userDescription, setUserDescription] = useState();
+  const [userAvatar, setUserAvatar] = useState();
+  const [cards, setCards] = useState([]);
 
-    openPopupAvatar.setEventListeners();
-    openPopupAvatar.open();
-    // avatarFormValidation.resetValidation();
-  };
-  const handleEditProfileClick = () => {
-    const popupEdit = document.querySelector(".popup-type-edit");
-
-    const openPopupEdit = new PopupWithForm({
-      popup: popupEdit,
-      handleFormSubmit: (data) => {
-        openPopupEdit.loading(true);
-      },
-    });
-    openPopupEdit.setEventListeners();
-    openPopupEdit.open();
-  };
-
-  const handleAddPlaceClick = () => {
-    const popupAdd = document.querySelector(".popup_type_add");
-    const openPopupAdd = new PopupWithForm({
-      //попап добавления карточки
-      popup: popupAdd,
-      handleFormSubmit: (inputValues) => {
-        openPopupAdd.loading(true);
-      },
-    });
-    openPopupAdd.setEventListeners();
-    openPopupAdd.open();
-  };
+  useEffect(() => {
+    api
+      .getUserInfo()
+      .then((data) => {
+        setUserName(data.name);
+        setUserDescription(data.about);
+        setUserAvatar(data.avatar);
+        api
+          .getCards()
+          .then((cards) => {
+            setCards(cards);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
 
   return (
     <main>
@@ -56,47 +38,39 @@ function Main() {
           className="profile__edit-avatar"
           type="button"
           aria-label="кнопка редактирования аватара"
-          onClick={handleEditAvatarClick}
+          onClick={props.onEditAvatar}
         >
-          <img className="profile__avatar" alt="Аватар" />
+          <img className="profile__avatar" alt="Аватар" src={userAvatar} />
         </button>
         <div className="profile__info">
           <div className="profile__wrapper">
-            <h1 className="profile__name"></h1>
+            <h1 className="profile__name">{userName}</h1>
             <button
               className="profile__button"
               type="button"
               aria-label="кнопка редактировать профиль"
-              onClick={handleEditProfileClick}
+              onClick={props.onEditProfile}
             ></button>
           </div>
-          <p className="profile__job"></p>
+          <p className="profile__job">{userDescription}</p>
         </div>
         <button
           className="profile__add-button"
           type="button"
           aria-label="кнопка добавить контент"
-          onClick={handleAddPlaceClick}
+          onClick={props.onAddPlace}
         ></button>
       </section>
       <section className="elements">
-        <template className="element__template">
-          <div className="element">
-            <button className="element__delete" type="button"></button>
-            <img
-              className="element__image"
-              src="#"
-              alt="Изображение достопримечательности"
+        {cards.map((card) => {
+          return (
+            <Card
+              key={card._id}
+              card={card}
+              handleCardClick={props.onCardClick}
             />
-            <div className="element__info">
-              <h2 className="element__name"></h2>
-              <div className="element__wrapper-like">
-                <button className="element__like" type="button"></button>
-                <p className="element__count-like"></p>
-              </div>
-            </div>
-          </div>
-        </template>
+          );
+        })}
       </section>
     </main>
   );
