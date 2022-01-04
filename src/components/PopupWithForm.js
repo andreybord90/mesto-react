@@ -1,6 +1,4 @@
 import React from "react";
-// import { useEffect } from "react";
-// import { useClosePopup } from "../utils/utils";
 
 function PopupWithForm({
   name,
@@ -9,8 +7,10 @@ function PopupWithForm({
   onClose,
   children,
   useClosePopup,
+  useClosePopupByEscape,
 }) {
   useClosePopup("popup_opened", "popup__exit", onClose, isOpen);
+  useClosePopupByEscape(isOpen);
 
   return (
     <>
@@ -27,7 +27,7 @@ function PopupWithForm({
             name="popup__form"
             noValidate
           >
-            <h2 className="popup__title"> {title}</h2>
+            <h2 className={`popup__title `}> {title}</h2>
             {children}
           </form>
         </div>

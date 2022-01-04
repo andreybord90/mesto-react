@@ -7,3 +7,9 @@
   margin: 0;
   margin-bottom: 38px;
 }
+
+@media (max-width: 800px) {
+  .popup__title_type_submit {
+    padding: 12px 118px 16px;
+  }
+}

@@ -28,6 +28,7 @@ function App() {
   const handleAddPlaceClick = () => {
     setIsAddPlacePopupOpen(!isAddPlacePopupOpen);
   };
+
   const handleRemovePlaceClick = () => {
     setRemovePlacePopupOpen(!isRemovePlacePopupOpen);
   };
@@ -41,19 +42,21 @@ function App() {
     setIsAddPlacePopupOpen(false);
     setIsEditAvatarPopupOpen(false);
     setRemovePlacePopupOpen(false);
-    setSelectedCard({ name: "", link: "" });
+    setSelectedCard({});
   };
 
-  const useClosePopupByEscape = (closePopupHandler) => {
+  const useClosePopupByEscape = (isOpen) => {
     const closeByEsc = (e) => {
       if (e.key === "Escape") {
-        closePopupHandler();
+        closeAllPopups();
       }
     };
     useEffect(() => {
-      document.addEventListener("keydown", closeByEsc);
-      return () => document.removeEventListener("keydown", closeByEsc);
-    }, []);
+      if (isOpen) {
+        document.addEventListener("keydown", closeByEsc);
+        return () => document.removeEventListener("keydown", closeByEsc);
+      }
+    }, [isOpen]);
   };
 
   const useClosePopup = (
@@ -67,9 +70,7 @@ function App() {
         e.target.classList.contains(overlayClassName /*"popup_opened"*/) ||
         e.target.classList.contains(closeButtonClassName /*"popup__exit"*/)
       ) {
-        if (onClose) {
-          onClose();
-        }
+        onClose();
       }
     };
     useEffect(() => {
@@ -81,8 +82,6 @@ function App() {
       }
     }, [isOpen]);
   };
-
-  useClosePopupByEscape(closeAllPopups);
 
   return (
     <div className="page">
@@ -103,6 +102,7 @@ function App() {
         isOpen={isEditProfilePopupOpen}
         onClose={closeAllPopups}
         useClosePopup={useClosePopup}
+        useClosePopupByEscape={useClosePopupByEscape}
       >
         <input
           type="text"
@@ -142,6 +142,7 @@ function App() {
         isOpen={isAddPlacePopupOpen}
         onClose={closeAllPopups}
         useClosePopup={useClosePopup}
+        useClosePopupByEscape={useClosePopupByEscape}
       >
         <input
           type="text"
@@ -179,6 +180,7 @@ function App() {
         isOpen={isRemovePlacePopupOpen}
         onClose={closeAllPopups}
         useClosePopup={useClosePopup}
+        useClosePopupByEscape={useClosePopupByEscape}
       >
         <button
           className="popup__button popup__button_type_submit"
@@ -194,6 +196,7 @@ function App() {
         isOpen={isEditAvatarPopupOpen}
         onClose={closeAllPopups}
         useClosePopup={useClosePopup}
+        useClosePopupByEscape={useClosePopupByEscape}
       >
         <input
           type="url"
@@ -218,6 +221,8 @@ function App() {
         card={selectedCard}
         onClose={closeAllPopups}
         useClosePopup={useClosePopup}
+        useClosePopupByEscape={useClosePopupByEscape}
+        isOpen={Boolean(Object.keys(selectedCard).length)}
       />
     </div>
   );

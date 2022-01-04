@@ -14,3 +14,9 @@
 .popup__button_type_submit:hover {
   opacity: 80%;
 }
+
+@media (max-width: 800px) {
+  .popup__button_type_submit {
+    padding: 12px 118px 16px;
+  }
+}
