@@ -1,8 +1,31 @@
 import React from "react";
-// import { useClosePopup } from "../utils/utils";
+// import { useEffect } from "react";
 
-function ImagePopup({ card, onClose, useClosePopup }) {
-  useClosePopup("popup_opened", "popup__exit", onClose);
+function ImagePopup({
+  card,
+  onClose,
+  useClosePopup,
+  isOpen,
+  useClosePopupByEscape,
+}) {
+  useClosePopup("popup_opened", "popup__exit", onClose, isOpen);
+  useClosePopupByEscape(isOpen);
+
+  // useEffect(() => {
+  //   const handleClose = (e) => {
+  //     if (
+  //       e.target.classList.contains("popup_opened") ||
+  //       e.target.classList.contains("popup__exit")
+  //     ) {
+  //       onClose();
+  //     }
+  //   };
+  //   document.addEventListener("click", handleClose);
+  //   return () => {
+  //     document.removeEventListener("click", handleClose);
+  //   };
+  // });
+
   return (
     <>
       <div

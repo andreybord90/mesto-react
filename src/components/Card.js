@@ -1,6 +1,6 @@
 import React from "react";
 
-function Card({ card, onCardClick }) {
+function Card({ card, onCardClick, onRemovePlace }) {
   function handleClick() {
     onCardClick(card);
   }
@@ -8,7 +8,11 @@ function Card({ card, onCardClick }) {
   return (
     <>
       <div className="element">
-        <button className="element__delete" type="button"></button>
+        <button
+          className="element__delete"
+          type="button"
+          onClick={onRemovePlace}
+        ></button>
         <img
           className="element__image"
           src={card.link}
