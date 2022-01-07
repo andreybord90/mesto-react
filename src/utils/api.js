@@ -36,24 +36,24 @@ class Api {
       headers: this._headers,
     }).then((res) => this._checkResponse(res));
   }
-  changeUserInfo(data) {
+  changeUserInfo({ name, about }) {
     return fetch(`${this._url}/users/me`, {
       method: "PATCH",
       headers: this._headers,
       body: JSON.stringify({
-        name: data.name,
-        about: data.about,
+        name: name,
+        about: about,
       }),
     }).then((res) => this._checkResponse(res));
   }
   //Добавление карточки
-  insertCard(data) {
+  insertCard({ name, link }) {
     return fetch(`${this._url}/cards `, {
       method: "POST",
       headers: this._headers,
       body: JSON.stringify({
-        name: data.name,
-        link: data.link,
+        name,
+        link,
       }),
     }).then((res) => this._checkResponse(res));
   }
@@ -64,14 +64,21 @@ class Api {
       headers: this._headers,
     }).then((res) => this._checkResponse(res));
   }
-  updateUserAvatar(data) {
+  updateUserAvatar(avatar) {
     return fetch(`${this._url}/users/me/avatar`, {
       method: "PATCH",
       headers: this._headers,
       body: JSON.stringify({
-        avatar: data.avatar,
+        avatar: avatar,
       }),
     }).then((res) => this._checkResponse(res));
+  }
+  changeLikeCardStatus(cardId, notLiked) {
+    if (notLiked) {
+      return this.setCardLike(cardId);
+    } else {
+      return this.removeCardLike(cardId);
+    }
   }
 }
 

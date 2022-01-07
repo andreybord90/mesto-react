@@ -5,46 +5,129 @@ import Header from "./Header";
 import Main from "./Main";
 import Footer from "./Footer";
 import PopupWithForm from "./PopupWithForm";
+import EditProfilePopup from "./EditProfilePopup";
+import EditAvatarPopup from "./EditAvatarPopup";
+import AddPlacePopup from "./AddPlacePopup";
 import ImagePopup from "./ImagePopup";
+import api from "../utils/api";
+import { CurrentUserContext } from "../contexts/CurrentUserContext";
 
 function App() {
+  const [selectedCard, setSelectedCard] = React.useState({});
+  const [currentUser, setCurrentUser] = React.useState({});
+  const [cards, setCards] = React.useState([]);
+
+  //Запрос данных с сервера
+
+  useEffect(() => {
+    Promise.all([api.getUserInfo(), api.getCards()])
+      .then(([dataProfile, dataUser]) => {
+        setCurrentUser(dataProfile);
+        setCards(dataUser);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
+  //функция обновления данных User
+
+  const handleUpdateUser = ({ name, about }) => {
+    api
+      .changeUserInfo({ name, about })
+      .then((data) => {
+        setCurrentUser(data);
+        closeAllPopups();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  //функция обновления данных avatar
+
+  const handleUpdateAvatar = ({ avatar }) => {
+    api
+      .updateUserAvatar(avatar)
+      .then((data) => {
+        setCurrentUser(data);
+        closeAllPopups();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  //Обработчики кликов
+  const handleEditAvatarClick = () => {
+    setIsEditAvatarPopupOpen(!isEditAvatarPopupOpen);
+  };
+  const handleEditProfileClick = () => {
+    setIsEditProfilePopupOpen(!isEditProfilePopupOpen);
+  };
+  const handleAddPlaceClick = () => {
+    setIsAddPlacePopupOpen(!isAddPlacePopupOpen);
+  };
+  const handleCardClick = (card) => {
+    setSelectedCard(card);
+  };
+
+  //Добавление карточки
+  const handleAddPlaceSubmit = (data) => {
+    api
+      .insertCard(data)
+      .then((newCard) => {
+        setCards([newCard, ...cards]);
+        closeAllPopups();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  //лайк на карточке
+  function handleCardLike(card) {
+    const isLiked = card.likes.some((i) => i._id === currentUser._id);
+
+    api
+      .changeLikeCardStatus(card._id, !isLiked)
+      .then((newCard) => {
+        setCards((state) =>
+          state.map((c) => (c._id === card._id ? newCard : c))
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  // Удаление карточки
+  function handleCardDelete(card) {
+    api
+      .deleteCard(card._id)
+      .then(() => {
+        setCards((state) => state.filter((c) => c._id !== card._id));
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  //стейты
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] =
     React.useState(false);
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] =
     React.useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = React.useState(false);
-  const [isRemovePlacePopupOpen, setRemovePlacePopupOpen] =
-    React.useState(false);
-  const [selectedCard, setSelectedCard] = React.useState({});
 
-  const handleEditAvatarClick = () => {
-    setIsEditAvatarPopupOpen(!isEditAvatarPopupOpen);
-  };
-
-  const handleEditProfileClick = () => {
-    setIsEditProfilePopupOpen(!isEditProfilePopupOpen);
-  };
-
-  const handleAddPlaceClick = () => {
-    setIsAddPlacePopupOpen(!isAddPlacePopupOpen);
-  };
-
-  const handleRemovePlaceClick = () => {
-    setRemovePlacePopupOpen(!isRemovePlacePopupOpen);
-  };
-
-  const handleCardClick = (card) => {
-    setSelectedCard(card);
-  };
-
+  //Закртыие попапов
   const closeAllPopups = () => {
     setIsEditProfilePopupOpen(false);
     setIsAddPlacePopupOpen(false);
     setIsEditAvatarPopupOpen(false);
-    setRemovePlacePopupOpen(false);
     setSelectedCard({});
   };
 
+  //хук закрытия
   const useClosePopupByEscape = (isOpen) => {
     const closeByEsc = (e) => {
       if (e.key === "Escape") {
@@ -58,7 +141,6 @@ function App() {
       }
     }, [isOpen]);
   };
-
   const useClosePopup = (
     overlayClassName,
     closeButtonClassName,
@@ -84,147 +166,68 @@ function App() {
   };
 
   return (
-    <div className="page">
-      <div className="wrapper">
-        <Header />
-        <Main
-          onEditProfile={handleEditProfileClick}
-          onAddPlace={handleAddPlaceClick}
-          onEditAvatar={handleEditAvatarClick}
-          onCardClick={handleCardClick}
-          onRemovePlace={handleRemovePlaceClick}
+    <CurrentUserContext.Provider value={currentUser}>
+      <div className="page">
+        <div className="wrapper">
+          <Header />
+          <Main
+            onEditProfile={handleEditProfileClick}
+            onAddPlace={handleAddPlaceClick}
+            onEditAvatar={handleEditAvatarClick}
+            onCardClick={handleCardClick}
+            onCardLike={handleCardLike}
+            onCardDelete={handleCardDelete}
+            cards={cards}
+          />
+          <Footer />
+        </div>
+        <EditProfilePopup
+          isOpen={isEditProfilePopupOpen}
+          onClose={closeAllPopups}
+          useClosePopup={useClosePopup}
+          useClosePopupByEscape={useClosePopupByEscape}
+          onUpdateUser={handleUpdateUser}
         />
-        <Footer />
+        <EditAvatarPopup
+          isOpen={isEditAvatarPopupOpen}
+          onClose={closeAllPopups}
+          useClosePopup={useClosePopup}
+          useClosePopupByEscape={useClosePopupByEscape}
+          onUpdateAvatar={handleUpdateAvatar}
+        />
+        <AddPlacePopup
+          isOpen={isAddPlacePopupOpen}
+          onClose={closeAllPopups}
+          useClosePopup={useClosePopup}
+          useClosePopupByEscape={useClosePopupByEscape}
+          onAddPlace={handleAddPlaceSubmit}
+        />
+
+        {/* <PopupWithForm
+            name="submit"
+            title="Вы уверены"
+            isOpen={isRemovePlacePopupOpen}
+            onClose={closeAllPopups}
+            useClosePopup={useClosePopup}
+            useClosePopupByEscape={useClosePopupByEscape}
+          >
+            <button
+              className="popup__button popup__button_type_submit"
+              type="submit"
+              aria-label="кнопка Удаление"
+            >
+              Да
+            </button>
+          </PopupWithForm> */}
+        <ImagePopup
+          card={selectedCard}
+          onClose={closeAllPopups}
+          useClosePopup={useClosePopup}
+          useClosePopupByEscape={useClosePopupByEscape}
+          isOpen={Boolean(Object.keys(selectedCard).length)}
+        />
       </div>
-      <PopupWithForm
-        name="edit"
-        title="Редактировать профиль"
-        isOpen={isEditProfilePopupOpen}
-        onClose={closeAllPopups}
-        useClosePopup={useClosePopup}
-        useClosePopupByEscape={useClosePopupByEscape}
-      >
-        <input
-          type="text"
-          className="popup__text popup__text_type_name"
-          name="name"
-          placeholder="Имя"
-          required
-          minLength="2"
-          maxLength="40"
-          autoComplete="off"
-          id="name"
-        />
-        <span className="popup__text-error" id="name-error"></span>
-        <input
-          type="text"
-          className="popup__text popup__text_type_job"
-          name="about"
-          placeholder="Профессиональная деятельность"
-          required
-          minLength="2"
-          maxLength="40"
-          autoComplete="off"
-          id="job"
-        />
-        <span className="popup__text-error" id="job-error"></span>
-        <button
-          className="popup__button"
-          type="submit"
-          aria-label="кнопка сохранить"
-        >
-          Сохранить
-        </button>
-      </PopupWithForm>
-      <PopupWithForm
-        name="add"
-        title="Новое место"
-        isOpen={isAddPlacePopupOpen}
-        onClose={closeAllPopups}
-        useClosePopup={useClosePopup}
-        useClosePopupByEscape={useClosePopupByEscape}
-      >
-        <input
-          type="text"
-          className="popup__text popup__text_type_sign"
-          name="name"
-          placeholder="Название"
-          required
-          minLength="2"
-          maxLength="30"
-          id="sign"
-          autoComplete="off"
-        />
-        <span className="popup__text-error" id="sign-error"></span>
-        <input
-          autoComplete="off"
-          type="url"
-          className="popup__text popup__text_type_url"
-          name="link"
-          placeholder="Ссылка на картинку"
-          required
-          id="url"
-        />
-        <span className="popup__text-error" id="url-error"></span>
-        <button
-          className="popup__button popup__button_type_add"
-          type="submit"
-          aria-label="кнопка создать"
-        >
-          Создать
-        </button>
-      </PopupWithForm>{" "}
-      <PopupWithForm
-        name="submit"
-        title="Вы уверены"
-        isOpen={isRemovePlacePopupOpen}
-        onClose={closeAllPopups}
-        useClosePopup={useClosePopup}
-        useClosePopupByEscape={useClosePopupByEscape}
-      >
-        <button
-          className="popup__button popup__button_type_submit"
-          type="submit"
-          aria-label="кнопка Удаление"
-        >
-          Да
-        </button>
-      </PopupWithForm>
-      <PopupWithForm
-        name="avatar"
-        title="Обновить аватар"
-        isOpen={isEditAvatarPopupOpen}
-        onClose={closeAllPopups}
-        useClosePopup={useClosePopup}
-        useClosePopupByEscape={useClosePopupByEscape}
-      >
-        <input
-          type="url"
-          className="popup__text popup__text_type_avatar"
-          name="avatar"
-          required
-          minLength="2"
-          autoComplete="off"
-          id="avatar"
-          placeholder="Ссылка на аватар"
-        />
-        <span className="popup__text-error" id="avatar-error"></span>
-        <button
-          className="popup__button popup__button_type_avatar"
-          type="submit"
-          aria-label="кнопка Сохранить"
-        >
-          Сохранить
-        </button>
-      </PopupWithForm>
-      <ImagePopup
-        card={selectedCard}
-        onClose={closeAllPopups}
-        useClosePopup={useClosePopup}
-        useClosePopupByEscape={useClosePopupByEscape}
-        isOpen={Boolean(Object.keys(selectedCard).length)}
-      />
-    </div>
+    </CurrentUserContext.Provider>
   );
 }
 
