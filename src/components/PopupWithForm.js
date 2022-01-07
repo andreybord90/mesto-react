@@ -8,6 +8,7 @@ function PopupWithForm({
   children,
   useClosePopup,
   useClosePopupByEscape,
+  onSubmit,
 }) {
   useClosePopup("popup_opened", "popup__exit", onClose, isOpen);
   useClosePopupByEscape(isOpen);
@@ -26,6 +27,7 @@ function PopupWithForm({
             className={`popup__form popup__form_type_${name}`}
             name="popup__form"
             noValidate
+            onSubmit={onSubmit}
           >
             <h2 className={`popup__title `}> {title}</h2>
             {children}

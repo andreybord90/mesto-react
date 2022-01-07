@@ -1,32 +1,17 @@
 import React from "react";
-import { useEffect, useState } from "react";
-import api from "../utils/api";
 import Card from "./Card";
+import { CurrentUserContext } from "../contexts/CurrentUserContext";
 
 function Main({
+  cards,
   onEditProfile,
   onAddPlace,
   onEditAvatar,
   onCardClick,
-  onRemovePlace,
+  onCardLike,
+  onCardDelete,
 }) {
-  const [userName, setUserName] = React.useState("");
-  const [userDescription, setUserDescription] = useState("");
-  const [userAvatar, setUserAvatar] = useState("");
-  const [cards, setCards] = useState([]);
-
-  useEffect(() => {
-    Promise.all([api.getUserInfo(), api.getCards()])
-      .then(([dataProfile, dataUser]) => {
-        setUserName(dataProfile.name);
-        setUserDescription(dataProfile.about);
-        setUserAvatar(dataProfile.avatar);
-        setCards(dataUser);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
+  const currentUser = React.useContext(CurrentUserContext);
 
   return (
     <main>
@@ -37,11 +22,15 @@ function Main({
           aria-label="кнопка редактирования аватара"
           onClick={onEditAvatar}
         >
-          <img className="profile__avatar" alt="Аватар" src={userAvatar} />
+          <img
+            className="profile__avatar"
+            alt="Аватар"
+            src={currentUser.avatar}
+          />
         </button>
         <div className="profile__info">
           <div className="profile__wrapper">
-            <h1 className="profile__name">{userName}</h1>
+            <h1 className="profile__name">{currentUser.name}</h1>
             <button
               className="profile__button"
               type="button"
@@ -49,7 +38,7 @@ function Main({
               onClick={onEditProfile}
             ></button>
           </div>
-          <p className="profile__job">{userDescription}</p>
+          <p className="profile__job">{currentUser.about}</p>
         </div>
         <button
           className="profile__add-button"
@@ -65,7 +54,8 @@ function Main({
               key={card._id}
               card={card}
               onCardClick={onCardClick}
-              onRemovePlace={onRemovePlace}
+              onCardLike={onCardLike}
+              onCardDelete={onCardDelete}
             />
           );
         })}
