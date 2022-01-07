@@ -158,7 +158,7 @@ function App() {
     useEffect(() => {
       if (isOpen) {
         document.addEventListener("click", handleClose);
-        return () => {
+        return (e) => {
           document.removeEventListener("click", handleClose);
         };
       }
