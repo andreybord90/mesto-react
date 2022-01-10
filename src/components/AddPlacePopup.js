@@ -32,7 +32,7 @@ function AddPlacePopup({
       setName("");
       setLink("");
     }
-  }, []);
+  }, [isOpen]);
 
   return (
     <>
